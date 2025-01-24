@@ -1,0 +1,66 @@
+// Define the region of interest (Pakistan boundary)
+var pakistan = ee.FeatureCollection("users/shahidiqbal/Pak");
+                  
+
+// Load the LCZ dataset and mosaic it
+var dataset = ee.ImageCollection('RUB/RUBCLIM/LCZ/global_lcz_map/latest')
+                .mosaic()
+                .clip(pakistan); // Clip to Pakistan boundary
+
+// Define visualization parameters for the LCZ Filter
+var visualization = {
+  bands: ['LCZ_Filter'],
+  min: 1,
+  max: 17,
+  palette: [
+    '8c0000', 'd10000', 'ff0000', 'bf4d00', 'ff6600',
+    'ff9955', 'faee05', 'bcbcbc', 'ffccaa', '555555',
+    '006a00', '00aa00', '648525', 'b9db79', '000000',
+    'fbf7ae', '6a6aff'
+  ]
+};
+
+// Add the LCZ map to the map
+Map.addLayer(dataset, visualization, 'LCZ Filter');
+
+// Add Pakistan boundary to the map
+Map.addLayer(pakistan, {color: 'blue'}, 'Pakistan Boundary');
+
+// Center the map on Pakistan
+Map.centerObject(pakistan, 6);
+
+// Add a legend
+var legend = ui.Panel({style: {position: 'bottom-left'}});
+legend.add(ui.Label({value: 'Pakistan Local Climate Zones (LCZ)', style: {fontWeight: 'bold', fontSize: '16px'}}));
+
+// LCZ Classes Legend
+var lczClasses = [
+  {color: '8c0000', name: 'Compact High-rise'},
+  {color: 'd10000', name: 'Compact Mid-rise'},
+  {color: 'ff0000', name: 'Compact Low-rise'},
+  {color: 'bf4d00', name: 'Open High-rise'},
+  {color: 'ff6600', name: 'Open Mid-rise'},
+  {color: 'ff9955', name: 'Open Low-rise'},
+  {color: 'faee05', name: 'Large Low-rise'},
+  {color: 'bcbcbc', name: 'Sparsely Built'},
+  {color: 'ffccaa', name: 'Heavy Industry'},
+  {color: '555555', name: 'Dense Trees'},
+  {color: '006a00', name: 'Scattered Trees'},
+  {color: '00aa00', name: 'Bush/Scrub'},
+  {color: '648525', name: 'Low Plants'},
+  {color: 'b9db79', name: 'Bare Rock or Paved'},
+  {color: '000000', name: 'Bare Soil or Sand'},
+  {color: 'fbf7ae', name: 'Water'},
+  {color: '6a6aff', name: 'Snow and Ice'}
+];
+
+// Add legend items
+lczClasses.forEach(function(lczClass) {
+  var colorBox = ui.Label('', {backgroundColor: lczClass.color, padding: '8px', margin: '4px'});
+  var description = ui.Label(lczClass.name, {margin: '4px 0 4px 6px'});
+  var legendItem = ui.Panel([colorBox, description], ui.Panel.Layout.Flow('horizontal'));
+  legend.add(legendItem);
+});
+
+// Add the legend to the map
+Map.add(legend);
